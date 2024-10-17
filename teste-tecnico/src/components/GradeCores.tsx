@@ -9,7 +9,12 @@ const GradeCores = ({ subItems }: { subItems: SubItems }) => {
         {subItems.items.map((corObj, index) => {
           if (isCorItem(corObj)) {
             return (
-              <CardColor key={index} titulo={corObj.titulo} cor={corObj.cor} />
+              <CardColor
+                key={index}
+                id={corObj.id}
+                titulo={corObj.titulo}
+                cor={corObj.cor}
+              />
             );
           }
 
