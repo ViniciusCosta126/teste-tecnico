@@ -4,13 +4,13 @@ import { isTaskItem } from "../helpers/defineType";
 import GradeCores from "./GradeCores";
 import { useLayout } from "../providers/LayoutProvider";
 import { useEffect } from "react";
+import ModalSaveJson from "./ModalSaveJson";
 const Main = () => {
   const { layout, saveLayout } = useLayout();
 
   const handleSave = () => {
     saveLayout();
   };
-  useEffect(() => {}, [layout]);
 
   if (!layout?.layout.content) {
     return <div>Carregando...</div>;
@@ -95,6 +95,8 @@ const Main = () => {
                   onClick={() => handleSave()}
                   type="button"
                   className="btn btn-dark col-12 text-light fw-bold"
+                  data-bs-toggle="modal"
+                  data-bs-target={"#meuModal"}
                 >
                   Salvar Layout
                 </button>
@@ -177,7 +179,7 @@ const Main = () => {
             })}
           </div>
         </div>
-
+        <ModalSaveJson layout={layout} />
         <footer className="bg-white sticky-footer">
           <div className="container my-auto">
             <div className="text-center my-auto copyright">
