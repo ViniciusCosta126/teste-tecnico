@@ -1,4 +1,4 @@
-interface Item {
+export interface Item {
   id: string;
   title: string;
   value: number;
@@ -29,7 +29,7 @@ interface Content {
   subItems?: SubItems[];
 }
 
-interface Layout {
+export interface Layout {
   content: Content[];
 }
 

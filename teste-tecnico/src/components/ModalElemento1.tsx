@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useLayout } from "../providers/LayoutProvider";
+
 interface ModalProps {
   id: string;
   titulo: string;
@@ -6,10 +9,17 @@ interface ModalProps {
 }
 
 const ModalElemento1 = ({ id, titulo, valor, classe }: ModalProps) => {
-  const handleFormClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
+  const [novoTitulo, setNovotitulo] = useState(titulo);
+  const [novoValor, setNovoValor] = useState(valor);
+  const [novaClasse, setNovaClasse] = useState(classe);
+  const { updateItemById } = useLayout();
+  const handleSubmit = () => {
+    updateItemById(id, {
+      title: novoTitulo,
+      value: novoValor,
+      classe: novaClasse,
+    });
   };
-
   return (
     <div
       className="modal fade"
@@ -33,7 +43,7 @@ const ModalElemento1 = ({ id, titulo, valor, classe }: ModalProps) => {
               aria-label="Close"
             ></button>
           </div>
-          <div className="modal-body" onClick={handleFormClick}>
+          <div className="modal-body">
             <small>
               Os campos devem ser referentes ao conteúdo dos Elementos editáveis
               do bloco escolhido.
@@ -48,7 +58,8 @@ const ModalElemento1 = ({ id, titulo, valor, classe }: ModalProps) => {
                   className="form-control"
                   id="subtitulo"
                   aria-describedby="subtituloHelp"
-                  value={titulo}
+                  value={novoTitulo}
+                  onChange={(e) => setNovotitulo(e.target.value)}
                 />
               </div>
               <div className="mb-3">
@@ -60,7 +71,8 @@ const ModalElemento1 = ({ id, titulo, valor, classe }: ModalProps) => {
                   className="form-control"
                   id="titulo"
                   aria-describedby="tituloHelp"
-                  value={valor}
+                  value={novoValor}
+                  onChange={(e) => setNovoValor(parseFloat(e.target.value))}
                 />
               </div>
               <div className="mb-3">
@@ -72,7 +84,8 @@ const ModalElemento1 = ({ id, titulo, valor, classe }: ModalProps) => {
                   className="form-control"
                   id="icone"
                   aria-describedby="iconeHelp"
-                  value={classe}
+                  value={novaClasse}
+                  onChange={(e) => setNovaClasse(e.target.value)}
                 />
               </div>
             </form>
@@ -85,7 +98,11 @@ const ModalElemento1 = ({ id, titulo, valor, classe }: ModalProps) => {
             >
               Cancelar
             </button>
-            <button type="button" className="btn btn-primary">
+            <button
+              onClick={() => handleSubmit()}
+              type="button"
+              className="btn btn-primary"
+            >
               Salvar Alterações
             </button>
           </div>

@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useLayout } from "../providers/LayoutProvider";
+
 interface ModalProps {
   id: string;
   titulo: string;
@@ -5,6 +8,13 @@ interface ModalProps {
 }
 
 const ModalCardCor = ({ id, titulo, cor }: ModalProps) => {
+  const [novoTitulo, setNovoTitulo] = useState(titulo);
+  const [novaCor, setNovaCor] = useState(cor);
+  const { updateItemById } = useLayout();
+
+  const handleSubmit = () => {
+    updateItemById(id, { titulo: novoTitulo, cor: novaCor });
+  };
   return (
     <div
       className="modal fade"
@@ -43,7 +53,8 @@ const ModalCardCor = ({ id, titulo, cor }: ModalProps) => {
                   className="form-control"
                   id="titulo"
                   aria-describedby="tituloHelp"
-                  value={titulo}
+                  value={novoTitulo}
+                  onChange={(e) => setNovoTitulo(e.target.value)}
                 />
               </div>
               <div className="mb-3">
@@ -54,7 +65,8 @@ const ModalCardCor = ({ id, titulo, cor }: ModalProps) => {
                   type="color"
                   className="form-control form-control-color"
                   id="exampleColorInput"
-                  value={cor}
+                  value={novaCor}
+                  onChange={(e) => setNovaCor(e.target.value)}
                   title="Choose your color"
                 />
               </div>
@@ -68,7 +80,11 @@ const ModalCardCor = ({ id, titulo, cor }: ModalProps) => {
             >
               Cancelar
             </button>
-            <button type="button" className="btn btn-primary">
+            <button
+              type="button"
+              onClick={() => handleSubmit()}
+              className="btn btn-primary"
+            >
               Salvar Alterações
             </button>
           </div>

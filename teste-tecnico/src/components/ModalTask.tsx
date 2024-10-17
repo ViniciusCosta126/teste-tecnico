@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useLayout } from "../providers/LayoutProvider";
+
 interface ModalProps {
   id: string;
   titulo: string;
@@ -5,15 +8,24 @@ interface ModalProps {
 }
 
 const ModalTask = ({ id, titulo, timestamp }: ModalProps) => {
+  const { updateItemById } = useLayout();
   const convertDate = (data: number) => {
-    const date = new Date(data * 1000); // Use 'data' como argumento, não 'timestamp'
+    const date = new Date(data * 1000);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
 
-    return `${year}-${month}-${day}`; // Retornar no formato YYYY-MM-DD
+    return `${year}-${month}-${day}`;
   };
+  const [novoTitulo, setNovoTitulo] = useState(titulo);
+  const [novoTimeStamp, setNovoTimeStamp] = useState(convertDate(timestamp));
 
+  const handleSubmit = () => {
+    const date = new Date(novoTimeStamp);
+    const timeStampFormated = Math.floor(date.getTime() / 1000);
+
+    updateItemById(id, { task: novoTitulo, time: timeStampFormated });
+  };
   return (
     <div
       className="modal fade"
@@ -52,7 +64,8 @@ const ModalTask = ({ id, titulo, timestamp }: ModalProps) => {
                   className="form-control"
                   id="titulo"
                   aria-describedby="tituloHelp"
-                  value={titulo}
+                  value={novoTitulo}
+                  onChange={(e) => setNovoTitulo(e.target.value)}
                 />
               </div>
               <div className="mb-3">
@@ -62,9 +75,10 @@ const ModalTask = ({ id, titulo, timestamp }: ModalProps) => {
                 <input
                   type="date"
                   className="form-control"
-                  id="data" // Alterar o id para algo mais apropriado
+                  id="data"
                   aria-describedby="dataHelp"
-                  value={convertDate(timestamp)} // Valor agora no formato YYYY-MM-DD
+                  value={novoTimeStamp}
+                  onChange={(e) => setNovoTimeStamp(e.target.value)}
                 />
               </div>
             </form>
@@ -77,7 +91,11 @@ const ModalTask = ({ id, titulo, timestamp }: ModalProps) => {
             >
               Cancelar
             </button>
-            <button type="button" className="btn btn-primary">
+            <button
+              onClick={() => handleSubmit()}
+              type="button"
+              className="btn btn-primary"
+            >
               Salvar Alterações
             </button>
           </div>

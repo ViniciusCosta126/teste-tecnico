@@ -1,33 +1,20 @@
-import { useEffect, useState } from "react";
 import CardElemento from "./CardElemento";
-import { LayoutProps } from "../Interfaces/ILayout";
 import ListaDeTarefas from "./ListaDeTarefas";
 import { isTaskItem } from "../helpers/defineType";
 import GradeCores from "./GradeCores";
+import { useLayout } from "../providers/LayoutProvider";
+import { useEffect } from "react";
 const Main = () => {
-  const [layout, setLayout] = useState<LayoutProps>();
+  const { layout, saveLayout } = useLayout();
 
-  useEffect(() => {
-    fetch("http://localhost:8000/api/layout")
-      .then((response) => response.json())
-      .then((data) => setLayout(data));
-  }, []);
-
-  const saveLayout = async () => {
-    await fetch("http://localhost:8000/api/layout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        layout: JSON.stringify(layout),
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => console.log("Layout salvo com sucesso:", data))
-      .catch((error) => console.error("Erro ao salvar o layout:", error));
+  const handleSave = () => {
+    saveLayout();
   };
+  useEffect(() => {}, [layout]);
+
+  if (!layout?.layout.content) {
+    return <div>Carregando...</div>;
+  }
 
   return (
     <>
@@ -105,7 +92,7 @@ const Main = () => {
               </div>
               <div className="nav-item" style={{ padding: "15px" }}>
                 <button
-                  onClick={() => saveLayout()}
+                  onClick={() => handleSave()}
                   type="button"
                   className="btn btn-dark col-12 text-light fw-bold"
                 >
