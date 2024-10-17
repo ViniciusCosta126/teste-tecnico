@@ -25,30 +25,57 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const fetchDados = async () => {
+    const storedLayout = localStorage.getItem("layoutData");
+    const expirationTime = localStorage.getItem("layoutExpiration");
+
+    if (storedLayout && expirationTime) {
+      const currentTime = Date.now();
+      if (currentTime < parseInt(expirationTime)) {
+        setLayout(JSON.parse(storedLayout));
+        return;
+      }
+    }
+
     try {
       const response = await fetch("http://localhost:8000/api/layout");
       const data = await response.json();
-
       setLayout(data.layout);
+      localStorage.setItem("layoutData", JSON.stringify(data.layout));
+      const oneHourInMillis = 60 * 60 * 1000;
+      localStorage.setItem(
+        "layoutExpiration",
+        (Date.now() + oneHourInMillis).toString()
+      );
     } catch (error) {
       console.error("Erro ao buscar o layout:", error);
     }
   };
 
   const saveLayout = async () => {
-    await fetch("http://localhost:8000/api/layout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        layout: JSON.stringify(layout),
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => console.log("Layout salvo com sucesso:", data))
-      .catch((error) => console.error("Erro ao salvar o layout:", error));
+    if (!layout) return;
+
+    try {
+      const response = await fetch("http://localhost:8000/api/layout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          layout: JSON.stringify(layout),
+        }),
+      });
+
+      const data = await response.json();
+      localStorage.setItem("layoutData", JSON.stringify(layout));
+      const oneHourInMillis = 60 * 60 * 1000;
+      localStorage.setItem(
+        "layoutExpiration",
+        (Date.now() + oneHourInMillis).toString()
+      );
+    } catch (error) {
+      console.error("Erro ao salvar o layout:", error);
+    }
   };
 
   const updateItemById = (itemId: string, newItemData: Partial<ItemType>) => {

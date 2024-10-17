@@ -1,18 +1,31 @@
 import CardElemento from "./CardElemento";
 import ListaDeTarefas from "./ListaDeTarefas";
-import { isTaskItem } from "../helpers/defineType";
+import { isCorItem, isTaskItem } from "../helpers/defineType";
 import GradeCores from "./GradeCores";
 import { useLayout } from "../providers/LayoutProvider";
-import { useEffect } from "react";
 import ModalSaveJson from "./ModalSaveJson";
+import { useState } from "react";
+
 const Main = () => {
   const { layout, saveLayout } = useLayout();
-
+  const [dataBsTarget, setDataBsTarget] = useState("");
   const handleSave = () => {
     saveLayout();
   };
 
+  const handleClick = (item: any) => {
+    if (isTaskItem(item)) {
+      setDataBsTarget(`#modalTask${item.id}`);
+    } else if (isCorItem(item)) {
+      setDataBsTarget(`#modalCor${item.id}`);
+    } else {
+      setDataBsTarget(`#modalElemento${item.id}`);
+    }
+
+    console.log(item);
+  };
   if (!layout?.layout.content) {
+    console.log(layout?.layout);
     return <div>Carregando...</div>;
   }
 
@@ -60,7 +73,11 @@ const Main = () => {
                         element.items.length > 0 &&
                         element.items.map((item) => {
                           return (
-                            <a key={item.id} className="dropdown-item" href="#">
+                            <a
+                              key={item.id}
+                              onClick={() => handleClick(item)}
+                              className="dropdown-item"
+                            >
                               {item.title}
                             </a>
                           );
@@ -70,7 +87,7 @@ const Main = () => {
                         element.subItems.length > 0 &&
                         element.subItems.map((item, index) => {
                           return (
-                            <a key={index} className="dropdown-item" href="#">
+                            <a key={index} className="dropdown-item">
                               {item.titulo}
                             </a>
                           );
@@ -85,7 +102,7 @@ const Main = () => {
                   type="button"
                   className="btn btn-success text-light fw-bold"
                   data-bs-toggle="modal"
-                  data-bs-target="#exampleModal"
+                  data-bs-target={dataBsTarget}
                 >
                   Modelo de Modal de Componente
                 </button>
