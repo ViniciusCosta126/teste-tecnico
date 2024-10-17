@@ -1,45 +1,33 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import CardElemento from "./CardElemento";
-import CardElementoTask from "./CardElementoTask";
-import CardColor from "./CardColor";
-
+import { LayoutProps } from "../Interfaces/ILayout";
+import ListaDeTarefas from "./ListaDeTarefas";
+import { isTaskItem } from "../helpers/defineType";
+import GradeCores from "./GradeCores";
 const Main = () => {
-  const colors = [
-    { titulo: "Primary", cor: "#4e73df" },
-    { titulo: "Success", cor: "#1cc88a" },
-    { titulo: "Info", cor: "#36b9cc" },
-    { titulo: "Warning", cor: "#f6c23e" },
-    { titulo: "Danger", cor: "#e74a3b" },
-    { titulo: "Secondary", cor: "#858796" },
-  ];
-  const elemento1 = [
-    {
-      title: "elemento 1",
-      value: 10000,
-    },
-    {
-      title: "elemento 2",
-      value: 23090,
-    },
-    {
-      title: "elemento 3",
-      value: 475,
-    },
-  ];
-  const elemento2 = [
-    {
-      task: "tarefa 1",
-      time: 1717276866,
-    },
-    {
-      task: "tarefa 2",
-      time: 1727276866,
-    },
-    {
-      task: "tarefa 3",
-      time: 1729276866,
-    },
-  ];
+  const [layout, setLayout] = useState<LayoutProps>();
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/layout")
+      .then((response) => response.json())
+      .then((data) => setLayout(data));
+  }, []);
+
+  const saveLayout = async () => {
+    await fetch("http://localhost:8000/api/layout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        layout: JSON.stringify(layout),
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => console.log("Layout salvo com sucesso:", data))
+      .catch((error) => console.error("Erro ao salvar o layout:", error));
+  };
 
   return (
     <>
@@ -61,52 +49,49 @@ const Main = () => {
           </a>
           <hr className="sidebar-divider my-0" />
           <ul className="navbar-nav text-light" id="accordionSidebar">
-            <li className="nav-item">
-              <div className="nav-item dropdown" style={{ padding: "15px" }}>
-                <a
-                  aria-expanded="true"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  className="dropdown-toggle link-light"
-                  href="#"
-                >
-                  <i className="fas fa-grip-horizontal icon-draggable"></i>
-                  Elemento Ordenável 1
-                </a>
-                <div data-bs-popper="none" className="dropdown-menu">
-                  <a className="dropdown-item" href="#">
-                    Elemento 1
-                  </a>
-                  <a className="dropdown-item" href="#">
-                    Elemento 2
-                  </a>
-                  <a className="dropdown-item" href="#">
-                    Elemento 3
-                  </a>
-                  <a className="dropdown-item" href="#">
-                    Elemento 4
-                  </a>
-                </div>
-              </div>
-              <div className="nav-item dropdown" style={{ padding: "15px" }}>
-                <a
-                  aria-expanded="true"
-                  data-bs-toggle="dropdown"
-                  className="dropdown-toggle link-light"
-                  href="#"
-                >
-                  <i className="fas fa-grip-horizontal icon-draggable"></i>
-                  Elemento Ordenável 2
-                </a>
-                <div data-bs-popper="none" className="dropdown-menu">
-                  <a className="dropdown-item" href="#">
-                    Lista de Tarefas
-                  </a>
-                  <a className="dropdown-item" href="#">
-                    Grade de Cores
-                  </a>
-                </div>
-              </div>
+            <li className="nav-item" id="lista">
+              {layout?.layout.content.map((element) => {
+                return (
+                  <div
+                    className="nav-item dropdown"
+                    style={{ padding: "15px" }}
+                    key={element.id}
+                  >
+                    <a
+                      aria-expanded="true"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      className="dropdown-toggle link-light"
+                      href="#"
+                      key={element.id}
+                    >
+                      <i className="fas fa-grip-horizontal icon-draggable"></i>
+                      {element.titulo}
+                    </a>
+                    <div data-bs-popper="none" className="dropdown-menu">
+                      {element.items &&
+                        element.items.length > 0 &&
+                        element.items.map((item) => {
+                          return (
+                            <a key={item.id} className="dropdown-item" href="#">
+                              {item.title}
+                            </a>
+                          );
+                        })}
+
+                      {element.subItems &&
+                        element.subItems.length > 0 &&
+                        element.subItems.map((item, index) => {
+                          return (
+                            <a key={index} className="dropdown-item" href="#">
+                              {item.titulo}
+                            </a>
+                          );
+                        })}
+                    </div>
+                  </div>
+                );
+              })}
 
               <div className="nav-item" style={{ padding: "15px" }}>
                 <button
@@ -120,6 +105,7 @@ const Main = () => {
               </div>
               <div className="nav-item" style={{ padding: "15px" }}>
                 <button
+                  onClick={() => saveLayout()}
                   type="button"
                   className="btn btn-dark col-12 text-light fw-bold"
                 >
@@ -127,87 +113,11 @@ const Main = () => {
                 </button>
               </div>
             </li>
-            <li className="nav-item"></li>
           </ul>
           <div className="text-center d-none d-md-inline"></div>
         </div>
       </nav>
-      <div
-        className="modal fade"
-        id="exampleModal"
-        tabIndex={-1}
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">
-                Modal de Configurações
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              <small>
-                Os campos devem ser referentes ao conteúdo dos Elementos
-                editáveis do bloco escolhido.
-              </small>
-              <form className="mt-4">
-                <div className="mb-3">
-                  <label htmlFor="subtitulo" className="form-label">
-                    Subtítulo
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="subtitulo"
-                    aria-describedby="subtituloHelp"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="titulo" className="form-label">
-                    Título
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="titulo"
-                    aria-describedby="tituloHelp"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="icone" className="form-label">
-                    Classe do Ícone
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="icone"
-                    aria-describedby="iconeHelp"
-                  />
-                </div>
-              </form>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Cancelar
-              </button>
-              <button type="button" className="btn btn-primary">
-                Salvar Alterações
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+
       <div className="d-flex flex-column" id="content-wrapper">
         <div id="content">
           <nav className="navbar navbar-expand bg-white text-center shadow justify-content-center mb-4 topbar">
@@ -243,58 +153,41 @@ const Main = () => {
             <div className="text-start d-sm-flex justify-content-between align-items-center mb-4">
               <h3 className="text-dark mb-0">Elementos</h3>
             </div>
-
-            {/* ELEMENTO ORDENÁVEL 1 */}
-            <div className="row">
-              <div className="col-xxl-12">
-                <h1>Elemento Ordenável 1</h1>
-              </div>
-              {elemento1.map((element, index) => {
-                return (
-                  <CardElemento key={index} titulo={element.title} valor={element.value} />
-                );
-              })}
-
-              {/* Bloco vazio */}
-            </div>
-
-            {/* ELEMENTO ORDENÁVEL 2 */}
-            <div className="row">
-              <div className="col-xxl-12">
-                <h1>Elemento Ordenável 2</h1>
-              </div>
-
-              <div className="col-lg-6 mb-4">
-                <div className="card shadow mb-4"></div>
-                <div className="card shadow mb-4">
-                  <div className="card-header py-3">
-                    <h6 className="text-primary fw-bold m-0">
-                      Lista de Tarefas
-                    </h6>
+            {layout?.layout.content.map((item) => {
+              return (
+                <div className="row" key={item.id}>
+                  {" "}
+                  <div className="col-xxl-12">
+                    <h1>{item.titulo}</h1>
                   </div>
-                  <ul className="list-group list-group-flush">
-                    {/* Bloco vazio */}
-                    {elemento2.map((element,index)=>{
-                      return <CardElementoTask key={index} task={element.task} time={element.time}/>
+                  {item.items &&
+                    item.items.length > 0 &&
+                    item.items.map((itemObj, index) => {
+                      return (
+                        <CardElemento
+                          key={itemObj.id}
+                          titulo={itemObj.title}
+                          id={itemObj.id}
+                          index={index}
+                          valor={itemObj.value}
+                          classe={itemObj.classe}
+                        />
+                      );
                     })}
-                  </ul>
+                  {item.subItems &&
+                    item.subItems.length > 0 &&
+                    item.subItems.map((itemObj, index) => {
+                      if (isTaskItem(itemObj.items[0])) {
+                        return (
+                          <ListaDeTarefas key={index} subItems={itemObj} />
+                        );
+                      } else {
+                        return <GradeCores key={index} subItems={itemObj} />;
+                      }
+                    })}
                 </div>
-              </div>
-
-              <div className="col">
-                <div className="row">
-                  {colors.map((element, index) => {
-                    return (
-                      <CardColor
-                        key={index}
-                        titulo={element.titulo}
-                        cor={element.cor}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
 
