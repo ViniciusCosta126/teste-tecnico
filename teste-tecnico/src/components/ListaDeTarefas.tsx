@@ -14,6 +14,7 @@ const ListaDeTarefas = ({ subItems }: { subItems: SubItems }) => {
           {subItems?.items?.map((taskObj, index) => {
             return isTaskItem(taskObj) ? (
               <CardElementoTask
+                id={taskObj.id}
                 key={index}
                 task={taskObj.task}
                 time={taskObj.time}
